@@ -33,17 +33,24 @@ static int __init hw2_init(void)
 				   "my button key", NULL);
 	if (err) {
 		pr_err("Unable to request interrupt for button\n");
-		return -EINVAL;
+		goto free_button;
 	}
 
 	err = gpio_request(LED_GPIO, "my_led");
 	if (err) {
 		pr_err("Unable to request LED GPIO\n");
-		return -EINVAL;
+		goto free_irq;
 	}
 	gpio_direction_output(LED_GPIO, led_on);
 
 	return 0;
+
+free_button:
+	gpio_free(BTN_GPIO);
+free_irq:
+	free_irq(irq, NULL);
+
+	return err;
 }
 
 static void __exit hw2_exit(void)
